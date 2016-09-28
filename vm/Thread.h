@@ -307,6 +307,11 @@ struct Thread {
 #if defined(ARCH_IA32) && defined(WITH_JIT)
     u4 spillRegion[MAX_SPILL_JIT_IA];
 #endif
+
+    /* valera begin */
+    int valeraThreadId;
+    bool valeraThreadDoTracing;
+    /* valera end */
 };
 
 /* start point for an internal thread; mimics pthread args */

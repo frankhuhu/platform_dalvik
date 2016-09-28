@@ -183,6 +183,7 @@ static int extractAndProcessZip(int zipFd, int cacheFd,
     //vmStarted = 1;
 
     /* do the optimization */
+    //ALOGI("yhu009: extractAndProcessZip debugfilename=%s", debugFileName);
     if (!dvmContinueOptimization(cacheFd, dexOffset, uncompLen, debugFileName,
             modWhen, crc32, isBootstrap))
     {
@@ -518,6 +519,7 @@ static int fromDex(int argc, char* const argv[])
     vmStarted = true;
 
     /* do the optimization */
+    //ALOGI("yhu009: fromDex debugfilename=%s", debugFileName);
     if (!dvmContinueOptimization(fd, offset, length, debugFileName,
             modWhen, crc, (flags & DEXOPT_IS_BOOTSTRAP) != 0))
     {

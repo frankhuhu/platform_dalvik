@@ -141,6 +141,10 @@
 #define offMethod_insns_bytecode 44
 #define offMethod_insns_ncg 48
 #endif
+/* valera begin */
+#define offObject_valeraObjState 8
+#define offObject_valeraThreadId 12
+/* valera end */
 
 #define offGlue_pc     0
 #define offGlue_fp     4

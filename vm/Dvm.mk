@@ -25,7 +25,7 @@
 # Compiler defines.
 #
 LOCAL_CFLAGS += -fstrict-aliasing -Wstrict-aliasing=2 -fno-align-jumps
-LOCAL_CFLAGS += -Wall -Wextra -Wno-unused-parameter
+LOCAL_CFLAGS += -Wall -Wextra -Wno-unused-parameter -Wno-unused-function
 LOCAL_CFLAGS += -DARCH_VARIANT=\"$(dvm_arch_variant)\"
 
 #
@@ -182,7 +182,8 @@ LOCAL_SRC_FILES := \
 	reflect/Reflect.cpp \
 	test/AtomicTest.cpp.arm \
 	test/TestHash.cpp \
-	test/TestIndirectRefTable.cpp
+	test/TestIndirectRefTable.cpp \
+	valera/valera.cpp
 
 # TODO: this is the wrong test, but what's the right one?
 ifneq ($(filter arm mips,$(dvm_arch)),)

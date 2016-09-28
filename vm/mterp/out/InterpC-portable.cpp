@@ -27,6 +27,9 @@
 #include "mterp/Mterp.h"
 #include <math.h>                   // needed for fmod, fmodf
 #include "mterp/common/FindInterface.h"
+/* valera begin */
+#include <valera/valera.h>
+/* valera end */
 
 /*
  * Configuration defines.  These affect the C implementations, i.e. the
@@ -565,11 +568,19 @@ GOTO_TARGET_DECL(exceptionThrown);
             ILOGV("|if-%s v%d,v%d,+0x%04x", (_opname), vsrc1, vsrc2,        \
                 branchOffset);                                              \
             ILOGV("> branch taken");                                        \
+            /* valera begin */                                              \
+            valeraTraceIfTest(self, curMethod,                              \
+                    (int)(pc - curMethod->insns), 1);                       \
+            /* valera end */                                                \
             if (branchOffset < 0)                                           \
                 PERIODIC_CHECKS(branchOffset);                              \
             FINISH(branchOffset);                                           \
         } else {                                                            \
             ILOGV("|if-%s v%d,v%d,-", (_opname), vsrc1, vsrc2);             \
+            /* valera begin */                                              \
+            valeraTraceIfTest(self, curMethod,                              \
+                    (int)(pc - curMethod->insns), 0);                       \
+            /* valera end */                                                \
             FINISH(2);                                                      \
         }
 
@@ -580,11 +591,19 @@ GOTO_TARGET_DECL(exceptionThrown);
             int branchOffset = (s2)FETCH(1);    /* sign-extended */         \
             ILOGV("|if-%s v%d,+0x%04x", (_opname), vsrc1, branchOffset);    \
             ILOGV("> branch taken");                                        \
+            /* valera begin */                                              \
+            valeraTraceIfTestZ(self, curMethod,                             \
+                    (int)(pc - curMethod->insns), 1);                       \
+            /* valera end */                                                \
             if (branchOffset < 0)                                           \
                 PERIODIC_CHECKS(branchOffset);                              \
             FINISH(branchOffset);                                           \
         } else {                                                            \
             ILOGV("|if-%s v%d,-", (_opname), vsrc1);                        \
+            /* valera begin */                                              \
+            valeraTraceIfTestZ(self, curMethod,                             \
+                    (int)(pc - curMethod->insns), 0);                       \
+            /* valera end */                                                \
             FINISH(2);                                                      \
         }
 
@@ -989,6 +1008,11 @@ GOTO_TARGET_DECL(exceptionThrown);
             dvmGetField##_ftype(obj, ifield->byteOffset));                  \
         ILOGV("+ IGET '%s'=0x%08llx", ifield->name,                         \
             (u8) GET_REGISTER##_regsize(vdst));                             \
+        /* valera begin */                                                  \
+        int loc = curMethod != NULL ? (int)(pc - curMethod->insns) : -1;    \
+        valeraTraceObjectRW(self, curMethod, loc, obj, ifield,              \
+                ref, VALERA_RW_READ);                                       \
+        /* valera end */                                                    \
     }                                                                       \
     FINISH(2);
 
@@ -1007,6 +1031,11 @@ GOTO_TARGET_DECL(exceptionThrown);
         SET_REGISTER##_regsize(vdst, dvmGetField##_ftype(obj, ref));        \
         ILOGV("+ IGETQ %d=0x%08llx", ref,                                   \
             (u8) GET_REGISTER##_regsize(vdst));                             \
+        /* valera begin */                                                  \
+        int loc = curMethod != NULL ? (int)(pc - curMethod->insns) : -1;    \
+        valeraTraceObjectRWQuick(self, curMethod, loc, obj,                 \
+                ref, VALERA_RW_READ);                                       \
+        /* valera end */                                                    \
     }                                                                       \
     FINISH(2);
 
@@ -1033,6 +1062,11 @@ GOTO_TARGET_DECL(exceptionThrown);
             GET_REGISTER##_regsize(vdst));                                  \
         ILOGV("+ IPUT '%s'=0x%08llx", ifield->name,                         \
             (u8) GET_REGISTER##_regsize(vdst));                             \
+        /* valera begin */                                                  \
+        int loc = curMethod != NULL ? (int)(pc - curMethod->insns) : -1;    \
+        valeraTraceObjectRW(self, curMethod, loc, obj, ifield,              \
+                ref, VALERA_RW_WRITE);                                      \
+        /* valera end */                                                    \
     }                                                                       \
     FINISH(2);
 
@@ -1051,6 +1085,11 @@ GOTO_TARGET_DECL(exceptionThrown);
         dvmSetField##_ftype(obj, ref, GET_REGISTER##_regsize(vdst));        \
         ILOGV("+ IPUTQ %d=0x%08llx", ref,                                   \
             (u8) GET_REGISTER##_regsize(vdst));                             \
+        /* valera begin */                                                  \
+        int loc = curMethod != NULL ? (int)(pc - curMethod->insns) : -1;    \
+        valeraTraceObjectRWQuick(self, curMethod, loc, obj,                 \
+                ref, VALERA_RW_WRITE);                                      \
+        /* valera end */                                                    \
     }                                                                       \
     FINISH(2);
 
@@ -1082,6 +1121,11 @@ GOTO_TARGET_DECL(exceptionThrown);
         SET_REGISTER##_regsize(vdst, dvmGetStaticField##_ftype(sfield));    \
         ILOGV("+ SGET '%s'=0x%08llx",                                       \
             sfield->name, (u8)GET_REGISTER##_regsize(vdst));                \
+        /* valera begin */                                                  \
+        int loc = curMethod != NULL ? (int)(pc - curMethod->insns) : -1;    \
+        valeraTraceStaticRW(self, curMethod, loc, sfield,                   \
+                ref, VALERA_RW_READ);                                       \
+        /* valera end */                                                    \
     }                                                                       \
     FINISH(2);
 
@@ -1105,6 +1149,11 @@ GOTO_TARGET_DECL(exceptionThrown);
         dvmSetStaticField##_ftype(sfield, GET_REGISTER##_regsize(vdst));    \
         ILOGV("+ SPUT '%s'=0x%08llx",                                       \
             sfield->name, (u8)GET_REGISTER##_regsize(vdst));                \
+        /* valera begin */                                                  \
+        int loc = curMethod != NULL ? (int)(pc - curMethod->insns) : -1;    \
+        valeraTraceStaticRW(self, curMethod, loc, sfield,                   \
+                ref, VALERA_RW_WRITE);                                      \
+        /* valera end */                                                    \
     }                                                                       \
     FINISH(2);
 
@@ -1148,6 +1197,10 @@ void dvmInterpretPortable(Thread* self)
     LOGVV("threadid=%d: %s.%s pc=%#x fp=%p",
         self->threadId, curMethod->clazz->descriptor, curMethod->name,
         pc - curMethod->insns, fp);
+
+    /* valera begin */
+    valeraTraceInterpEntry(self, curMethod);
+    /* valera end */
 
     /*
      * Handle any ongoing profiling and prep for debugging.
@@ -1869,6 +1922,9 @@ HANDLE_OPCODE(OP_PACKED_SWITCH /*vAA, +BBBB*/)
 
         offset = dvmInterpHandlePackedSwitch(switchData, testVal);
         ILOGV("> branch taken (0x%04x)", offset);
+        /* valera begin */
+        valeraTracePackedSwitch(self, curMethod, (int)(pc - curMethod->insns), offset);
+        /* valera end */
         if (offset <= 0)  /* uncommon */
             PERIODIC_CHECKS(offset);
         FINISH(offset);
@@ -1900,6 +1956,9 @@ HANDLE_OPCODE(OP_SPARSE_SWITCH /*vAA, +BBBB*/)
 
         offset = dvmInterpHandleSparseSwitch(switchData, testVal);
         ILOGV("> branch taken (0x%04x)", offset);
+        /* valera begin */
+        valeraTraceSparseSwitch(self, curMethod, (int)(pc - curMethod->insns), offset);
+        /* valera end */
         if (offset <= 0)  /* uncommon */
             PERIODIC_CHECKS(offset);
         FINISH(offset);
@@ -3572,6 +3631,10 @@ GOTO_TARGET(returnFromMethod)
          */
         PERIODIC_CHECKS(0);
 
+        /* valera begin */
+        valeraTraceMethodExit(self, curMethod);
+        /* valera end */
+
         ILOGV("> retval=0x%llx (leaving %s.%s %s)",
             retval.j, curMethod->clazz->descriptor, curMethod->name,
             curMethod->shorty);
@@ -3938,6 +4001,11 @@ GOTO_TARGET(invokeMethod, bool methodCallRange, const Method* _methodToCall,
             debugSaveArea = SAVEAREA_FROM_FP(newFp);
 #endif
             self->debugIsMethodEntry = true;        // profiling, debugging
+
+            /* valera begin */
+            valeraTraceMethodEntry(self, curMethod);
+            /* valera end */
+
             ILOGD("> pc <-- %s.%s %s", curMethod->clazz->descriptor,
                 curMethod->name, curMethod->shorty);
             DUMP_REGS(curMethod, fp, true);         // show input args
@@ -3953,6 +4021,10 @@ GOTO_TARGET(invokeMethod, bool methodCallRange, const Method* _methodToCall,
             if (self->interpBreak.ctl.subMode != 0) {
                 dvmReportPreNativeInvoke(methodToCall, self, newSaveArea->prevFrame);
             }
+
+            /* valera begin */
+            valeraTraceNativeEntry(self, methodToCall);
+            /* valera end */
 
             ILOGD("> native <-- %s.%s %s", methodToCall->clazz->descriptor,
                   methodToCall->name, methodToCall->shorty);
@@ -3983,6 +4055,10 @@ GOTO_TARGET(invokeMethod, bool methodCallRange, const Method* _methodToCall,
                 GOTO_exceptionThrown();
             }
 
+            /* valera begin */
+            valeraTraceNativeExit(self, methodToCall);
+            /* valera end */
+
             ILOGD("> retval=0x%llx (leaving native)", retval.j);
             ILOGD("> (return from native %s.%s to %s.%s %s)",
                 methodToCall->clazz->descriptor, methodToCall->name,
@@ -4009,6 +4085,10 @@ GOTO_TARGET_END
 
 bail:
     ILOGD("|-- Leaving interpreter loop");      // note "curMethod" may be NULL
+
+    /* valera begin */
+    valeraTraceInterpExit(self, curMethod);
+    /* valera end */
 
     self->interpSave.retval = retval;
 }

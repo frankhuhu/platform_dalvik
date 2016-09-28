@@ -19,7 +19,10 @@
  */
 #include "Dalvik.h"
 #include "native/InternalNativePriv.h"
-
+/* valera begin */
+#include <cutils/process_name.h>
+#include <valera/valera.h>
+/* valera end */
 
 /*
  * static int getMethodModifiers(Class decl_class, int slot)
@@ -64,6 +67,72 @@ static void Dalvik_java_lang_reflect_Method_invokeNative(const u4* args,
      */
     meth = dvmSlotToMethod(declaringClass, slot);
     assert(meth != NULL);
+
+    /* valera begin */
+    if((strcmp(meth->name, "main") == 0) &&
+        (strcmp(declaringClass->descriptor, "Landroid/app/ActivityThread;") == 0)) {
+        const char *proc_name = get_process_name();
+        assert(proc_name != NULL);
+
+        std::string optfile = "/data/data/" + std::string(proc_name) + "/valera/option.txt";
+        std::ifstream file(optfile.c_str());
+        std::string str;
+        if (file) {
+            for (int lineno = 1; std::getline(file, str); lineno++) {
+                if (lineno == 1) { // line 1: package name
+                    if (strcmp(str.c_str(), proc_name) == 0) {
+                        gDvm.valeraIsEnabled = true;
+                        gDvm.valeraPkgName = str;
+                        gDvm.valeraLogFile = std::string("/data/data/")
+                            + gDvm.valeraPkgName + "/valera";
+
+                        // Init main thread id to 1.
+                        Thread *thrd = dvmThreadSelf();
+                        thrd->valeraThreadId = ++valeraThreadCount;
+                    }
+                } else if (lineno == 2) { // mode: non / record / replay
+                    gDvm.valeraMode = VALERA_MODE_NONE;
+                    if (gDvm.valeraIsEnabled) {
+                        if (strcmp(str.c_str(), "record") == 0) {
+                            gDvm.valeraMode = VALERA_MODE_RECORD;
+                            gDvm.valeraLogFile += "/record.trace.z";
+                        } else if (strcmp(str.c_str(), "replay") == 0) {
+                            gDvm.valeraMode = VALERA_MODE_REPLAY;
+                            gDvm.valeraLogFile += "/replay.trace.z";
+                        } else {
+                            ALOGE("VALERA ERROR: Invalid mode in the config file.");
+                            dvmAbort();
+                        }
+                        ALOGI("VALERA: mode is %d, trace file is %s", 
+                                gDvm.valeraMode, gDvm.valeraLogFile.c_str());
+                    }
+                } else if (lineno == 3) { // tracing
+                    if (gDvm.valeraIsEnabled && strcmp(str.c_str(), "tracing=1") == 0) {
+                        gDvm.valeraTracing = true;
+                        ALOGI("VALERA: tracing = %d", gDvm.valeraTracing);
+                    }
+                } else if (lineno == 4) { // blacklist
+                    int n = strlen("blacklist=");
+                    const char *ptr = str.c_str();
+                    if (gDvm.valeraIsEnabled && strncmp(ptr, "blacklist=", n) == 0) {
+                        ptr += n;
+                        ALOGI("VALERA: blacklist = %s", ptr);
+                        std::ifstream blfile(ptr);
+                        std::string s;
+                        if (blfile) {
+                            while (std::getline(blfile, s)) {
+                                gDvm.valeraTraceBlacklist.push_back(s);
+                                ALOGI("VALERA: blacklist method = %s", s.c_str());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        ALOGI("VALERA: dalvik.invokeNative process_name = %s, enabled = %d", 
+                proc_name, gDvm.valeraIsEnabled);
+    }
+    /* valera end */
 
     if (dvmIsStaticMethod(meth)) {
         if (!dvmIsClassInitialized(declaringClass)) {

@@ -2911,6 +2911,7 @@ int dexSwapAndVerify(u1* addr, int len)
             okay = okay && swapMap(&state, pDexMap);
             okay = okay && swapEverythingButHeaderAndMap(&state, pDexMap);
 
+            //ALOGI("yhu009: dexSwapAndVerify addr=%p", addr);
             dexFileSetupBasicPointers(&dexFile, addr);
             state.pDexFile = &dexFile;
 

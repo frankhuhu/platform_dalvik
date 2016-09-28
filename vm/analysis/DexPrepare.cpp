@@ -606,6 +606,7 @@ bool dvmContinueOptimization(int fd, off_t dexOffset, long dexLength,
             DvmDex* pDvmDex = NULL;
             u1* dexAddr = ((u1*) mapAddr) + dexOffset;
 
+            //ALOGI("yhu009: dvmContinueOptimization dexAddr=%p filename=%s", dexAddr, fileName);
             if (dvmDexFileOpenPartial(dexAddr, dexLength, &pDvmDex) != 0) {
                 ALOGE("Unable to create DexFile");
                 success = false;
@@ -808,6 +809,7 @@ static bool rewriteDex(u1* addr, int len, bool doVerify, bool doOpt,
      * Now that the DEX file can be read directly, create a DexFile struct
      * for it.
      */
+    //ALOGI("yhu009: rewriteDex addr=%p len=%d", addr, len);
     if (dvmDexFileOpenPartial(addr, len, &pDvmDex) != 0) {
         ALOGE("Unable to create DexFile");
         goto bail;

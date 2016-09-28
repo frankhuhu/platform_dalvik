@@ -197,6 +197,7 @@ UnzipToFileResult dexOpenAndMap(const char* fileName, const char* tempFileName,
      */
     sysChangeMapAccess(pMap->addr, pMap->length, true, pMap);
 
+    //ALOGI("yhu009: dexOpenAndMap filename=%s", fileName);
     if (dexSwapAndVerifyIfNecessary((u1*) pMap->addr, pMap->length)) {
         fprintf(stderr, "ERROR: Failed structural verification of '%s'\n",
             fileName);

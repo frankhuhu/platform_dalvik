@@ -271,6 +271,7 @@ static void Dalvik_dalvik_system_DexFile_openDexFile_bytearray(const u4* args,
 
     memcpy(pBytes, fileContentsObj->contents, length);
 
+    //ALOGI("yhu009: Dalvik_dalvik_system_DexFile_openDexFile_bytearray filename=<memory>");
     if (dvmRawDexFileOpenArray(pBytes, length, &pRawDexFile) != 0) {
         ALOGV("Unable to open in-memory DEX file");
         free(pBytes);

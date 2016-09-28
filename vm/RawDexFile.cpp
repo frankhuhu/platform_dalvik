@@ -25,6 +25,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+/* valera begin */
+#include <valera/valera.h>
+/* valera end */
 
 /*
  * Copy the given number of bytes from one fd to another, first
@@ -213,6 +216,10 @@ int dvmRawDexFileOpen(const char* fileName, const char* odexOutputName,
         ALOGI("Unable to map cached %s", fileName);
         goto bail;
     }
+
+    /* valera begin */
+    valeraLoadDexLib(fileName, pDvmDex);
+    /* valera end */
 
     if (locked) {
         /* unlock the fd */

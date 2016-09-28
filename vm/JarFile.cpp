@@ -30,6 +30,9 @@
 #include <zlib.h>
 #include <fcntl.h>
 #include <errno.h>
+/* valera begin */
+#include <valera/valera.h>
+/* valera end */
 
 static const char* kDexInJarName = "classes.dex";
 
@@ -330,6 +333,10 @@ tryArchive:
         ALOGI("Unable to map %s in %s", kDexInJarName, fileName);
         goto bail;
     }
+
+    /* valera begin */
+    valeraLoadDexLib(fileName, pDvmDex);
+    /* valera end */
 
     if (locked) {
         /* unlock the fd */

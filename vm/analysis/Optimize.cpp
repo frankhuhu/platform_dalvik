@@ -237,8 +237,12 @@ static void optimizeMethod(Method* method, bool essentialOnly)
 rewrite_inst_field:
             if (essentialOnly)
                 quickOpc = OP_NOP;      /* if essential-only, no "-quick" sub */
-            if (quickOpc != OP_NOP || volatileOpc != OP_NOP)
-                rewriteInstField(method, insns, quickOpc, volatileOpc);
+            /* valera begin */
+            // In valera mode, we need field info. Thus we disable optimizing
+            // iget/iput instructions.
+            //if (quickOpc != OP_NOP || volatileOpc != OP_NOP)
+            //    rewriteInstField(method, insns, quickOpc, volatileOpc);
+            /* valera end */
             break;
 
         case OP_SGET:

@@ -732,6 +732,15 @@ struct DvmGlobals {
 
     /* String pointed here will be deposited on the stack frame of dvmAbort */
     const char *lastMessage;
+
+    /* valera begin */
+    bool        valeraIsEnabled;
+    std::string valeraPkgName;
+    std::string valeraLogFile;
+    bool        valeraTracing;
+    int         valeraMode;
+    std::vector<std::string> valeraTraceBlacklist;
+    /* valera end */
 };
 
 extern struct DvmGlobals gDvm;

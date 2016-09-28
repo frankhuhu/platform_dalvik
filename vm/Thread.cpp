@@ -33,6 +33,10 @@
 #include <errno.h>
 #include <fcntl.h>
 
+/* valera begin */
+#include <valera/valera.h>
+/* valera end */
+
 #if defined(HAVE_PRCTL)
 #include <sys/prctl.h>
 #endif
@@ -1418,6 +1422,17 @@ bool dvmCreateInterpThread(Object* threadObj, int reqStackSize)
 
     if (!dvmGetFieldBoolean(threadObj, gDvm.offJavaLangThread_daemon))
         gDvm.nonDaemonThreadCount++;        // guarded by thread list lock
+
+    /* valera begin */
+    if (gDvm.valeraIsEnabled) {
+        // Ignore some threads created by valera.
+        std::string name = dvmGetThreadName(newThread);
+        if (name != "ValeraPollingThread") {
+            newThread->valeraThreadId = ++valeraThreadCount;
+            valeraForkInterpThread(self, newThread);
+        }
+    }
+    /* valera end */
 
     dvmUnlockThreadList();
 

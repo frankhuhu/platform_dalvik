@@ -111,6 +111,7 @@ int dvmDexFileOpenFromFd(int fd, DvmDex** ppDvmDex)
         goto bail;
     }
 
+    //ALOGI("yhu009: dvmDexFileOpenFromFd fd=%d", fd);
     pDexFile = dexFileParse((u1*)memMap.addr, memMap.length, parseFlags);
     if (pDexFile == NULL) {
         ALOGE("DEX parse failed");
@@ -155,6 +156,7 @@ int dvmDexFileOpenPartial(const void* addr, int len, DvmDex** ppDvmDex)
         parseFlags |= kDexParseVerifyChecksum;
     */
 
+    //ALOGI("yhu009: dvmDexFileOpenPartial addr=%p len=%d", addr, len);
     pDexFile = dexFileParse((u1*)addr, len, parseFlags);
     if (pDexFile == NULL) {
         ALOGE("DEX parse failed");

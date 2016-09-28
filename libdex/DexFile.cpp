@@ -278,6 +278,8 @@ void dexFileSetupBasicPointers(DexFile* pDexFile, const u1* data) {
     pDexFile->pProtoIds = (const DexProtoId*) (data + pHeader->protoIdsOff);
     pDexFile->pClassDefs = (const DexClassDef*) (data + pHeader->classDefsOff);
     pDexFile->pLinkData = (const DexLink*) (data + pHeader->linkOff);
+
+    //ALOGI("yhu009: dexFileSetupBasicPointers DexFile=%p baseAddr=%p", pDexFile, data);
 }
 
 /*
@@ -332,6 +334,8 @@ DexFile* dexFileParse(const u1* data, size_t length, int flags)
         }
         length = pDexFile->pOptHeader->dexLength;
     }
+
+    //ALOGI("yhu009: dexFileParse data=%p", data);
 
     dexFileSetupBasicPointers(pDexFile, data);
     pHeader = pDexFile->pHeader;
